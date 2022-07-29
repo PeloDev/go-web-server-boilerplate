@@ -1,31 +1,53 @@
 package main
 
 import (
-	"gopherconuk/homepage"
-	"gopherconuk/server"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/PeloDev/go-web-server-boilerplate/examples"
+	"github.com/PeloDev/go-web-server-boilerplate/homepage"
+	"github.com/rs/cors"
 )
 
 var (
-	GcukCertFile    = os.Getenv("GCUK_CERT_FILE")
-	GcukKeyFile     = os.Getenv("GCUK_KEY_FILE")
-	GcukServiceAddr = os.Getenv("GCUK_SERVICE_ADDR")
+	// TODO: serve via TLS (securely)
+	// CertFile    = os.Getenv("GO_CERT_FILE")
+	// KeyFile     = os.Getenv("GO_KEY_FILE")
+	ServiceAddr = os.Getenv("GO_SERVICE_ADDR")
 )
 
 func main() {
-	logger := log.New(os.Stdout, "gcuk ", log.LstdFlags|log.Lshortfile)
+	if len(ServiceAddr) < 1 {
+		ServiceAddr = ":8080"
+	}
 
+	logger := log.New(os.Stdout, "goServerT ", log.LstdFlags|log.Lshortfile)
+
+	// define features with logger
 	h := homepage.NewHandlers(logger)
+	egs := examples.NewHandlers(logger)
 
 	mux := http.NewServeMux()
-	h.SetupRoutes(mux)
 
-	srv := server.New(mux, GcukServiceAddr)
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "PUT", "OPTIONS", "POST", "DELETE"},
+		AllowCredentials: true,
+	})
+
+	// decorate existing handler with cors functionality set in c
+	handler := c.Handler(mux)
+
+	// feature routes
+	h.SetupRoutes(mux)
+	egs.SetupRoutes(mux)
 
 	logger.Println("server starting")
-	err := srv.ListenAndServeTLS(GcukCertFile, GcukKeyFile)
+
+	// srv := server.New(mux, ServiceAddr)
+	// err := srv.ListenAndServeTLS(CertFile, KeyFile) // TODO: serve via TLS (securely)
+	err := http.ListenAndServe(ServiceAddr, handler)
 	if err != nil {
 		logger.Fatalf("server failed to start: %v", err)
 	}
