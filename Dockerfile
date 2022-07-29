@@ -5,14 +5,14 @@ RUN apk add --no-cache git
 
 # Secure against running as root
 RUN adduser -D -u 10000 florin
-RUN mkdir /gopherconuk/ && chown florin /gopherconuk/
+RUN mkdir /go-web-server-boilerplate/ && chown florin /go-web-server-boilerplate/
 USER florin
 
-WORKDIR /gopherconuk/
-ADD . /gopherconuk/
+WORKDIR /go-web-server-boilerplate/
+ADD . /go-web-server-boilerplate/
 
 # Compile the binary, we don't want to run the cgo resolver
-RUN CGO_ENABLED=0 go build -o /gopherconuk/gcuk .
+RUN CGO_ENABLED=0 go build -o /go-web-server-boilerplate/goServerT .
 
 # final stage
 FROM alpine:3.8
@@ -22,9 +22,9 @@ RUN adduser -D -u 10000 florin
 USER florin
 
 WORKDIR /
-COPY --from=build-env /gopherconuk/certs/docker.localhost.* /
-COPY --from=build-env /gopherconuk/gcuk /
+COPY --from=build-env /go-web-server-boilerplate/certs/docker.localhost.* /
+COPY --from=build-env /go-web-server-boilerplate/goServerT /
 
 EXPOSE 8080
 
-CMD ["/gcuk"]
+CMD ["/goServerT"]
