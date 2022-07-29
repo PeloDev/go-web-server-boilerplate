@@ -27,7 +27,7 @@ Clone this anywhere onto your computer and open the project in your editor.
 If you prefer to use Go Mod run the following (using your own workspace directory):
 
 ```
-export GO111MODULE=on && go mod init github.com/PeloDev/go-server-template
+export GO111MODULE=on && go mod init github.com/PeloDev/go-web-server-boilerplate
 ```
 
 You can also create a `.env` file based on the [.env.example template](.env.example).
